@@ -1,0 +1,16 @@
+vm_ostype: "other"
+vm_hard_disks:
+- id: 0
+  bus: virtio
+  storage: local-zfs
+  size: 32
+
+vm_net_interfaces:
+- id: net0
+  model: virtio
+  bridge: vmbr0
+
+vm_isos:
+- id: 2
+  storage: local
+  filename: "FreeBSD-{{ freebsd_iso_version }}-RELEASE-amd64-disc1-{{ freebsd_iso_name }}.iso"

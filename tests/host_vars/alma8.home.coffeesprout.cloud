@@ -1,0 +1,3 @@
+hostname: alma8.home.coffeesprout.cloud
+ks_oemdrv_template: alma8.ks
+ip_address: 172.16.0.130

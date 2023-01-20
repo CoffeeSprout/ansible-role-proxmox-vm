@@ -1,0 +1,34 @@
+vm_name: "{{ hostname }}"
+ks_oemdrv_name: "{{ vm_name }}"
+vtnets:
+- name: eth0
+  ip: "{{ ip_address }}"
+  netmask: 255.255.255.0
+  gateway: "{{ default_gateway }}"
+
+ks_repo_url: "http://mirror.mijn.host/almalinux/"
+
+#VM Settings
+vm_ostype: "l26"
+vm_machine: 'q35'
+vm_pre_enrolled_keys: True
+
+vm_hard_disks:
+- id: 0
+  bus: virtio
+  storage: local-zfs
+  size: "{{ main_disk_size | default('32') }}"
+
+vm_net_interfaces:
+- id: net0
+  model: virtio
+  bridge: "vmbr0"
+
+vm_isos:
+- id: 2
+  storage: local
+  filename: "OEMDRV-{{ vm_name }}.iso"
+- id: 0
+  storage: local
+  filename: "AlmaLinux-8.6-x86_64-minimal.iso"
+

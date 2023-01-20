@@ -1,0 +1,17 @@
+dns:
+- 1.1.1.1
+- 8.8.8.8
+users:
+- name: coffeesprout
+  sudo: True
+  ssh: True
+rootpw: "notverysecure"
+
+iso_workdir: "/var/lib/vz/template/iso/"
+default_gateway: 172.16.0.1
+proxmox_api_user: 'root@pam'
+proxmox_api_host: neptune.home.coffeesprout.cloud
+proxmox_node: neptune
+
+#I run mostly E5 26** v3+; Also required because the default kvm64 doesn't work well on Alma9
+vm_cpu: Haswell-noTSX

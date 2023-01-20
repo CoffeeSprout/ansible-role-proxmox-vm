@@ -1,0 +1,11 @@
+localhost
+neptune
+neptune.home.coffeesprout.cloud
+
+[freebsd_vms]
+freebsd13.home.coffeesprout.cloud
+freebsd12.home.coffeesprout.cloud
+
+[alma_vms]
+alma8.home.coffeesprout.cloud
+alma9.home.coffeesprout.cloud

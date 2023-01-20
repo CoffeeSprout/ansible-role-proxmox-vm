@@ -1,0 +1,10 @@
+freebsd_iso_name: freebsd13
+hostname: freebsd13.home.coffeesprout.cloud
+vtnets:
+- name: vtnet0
+  ip: 172.16.0.231
+  netmask: 255.255.255.0
+  group: uplink
+
+vm_name: "{{ hostname }}"
+freebsd_iso_version: 13.1
