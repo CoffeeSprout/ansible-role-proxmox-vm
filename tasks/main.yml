@@ -1,10 +1,12 @@
 ---
 # tasks file for coffeesprout.proxmox-vm
 
+
+
 - name: create new VM with UEFI
   community.general.proxmox_kvm:
     api_user: "{{ proxmox_api_user | default('root@pam') }}"
-    api_password: "{{ lookup('env', 'PROXMOX_PASSWORD') }}"
+    api_password: "{{ proxmox_api_password | default(lookup('env', 'PROXMOX_PASSWORD')) }}"
     api_host: "{{ proxmox_api_host }}"
     node: "{{ proxmox_node }}"
     state: present
@@ -38,5 +40,3 @@
     scsihw: "{{ vm_scsihw | default('virtio-scsi-pci') }}"
   delegate_to: "{{ proxmox_node }}"
   register: proxmox_vm_created
-
-
