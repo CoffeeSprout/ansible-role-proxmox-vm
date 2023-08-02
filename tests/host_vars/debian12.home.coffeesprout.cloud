@@ -1,8 +1,10 @@
 hostname: debian12.home.coffeesprout.cloud
 vtnets:
-- name: vtnet0
+- id: 0
+  name: vtnet0
   ip: 172.16.0.235
   netmask: 255.255.255.0
+  gateway: 172.16.0.1
   cidr: "24"
 
 vm_name: "{{ hostname }}"

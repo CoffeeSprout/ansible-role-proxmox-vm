@@ -34,7 +34,7 @@
     boot: "c"
     ipconfig: >-
       {   {%- for net in vtnets | default([]) -%}
-            "{{ 'ipconfig' + loop.index|string }}":"ip={{ net.ip }}/{{ net.cidr }}{% if net.gateway is defined %},gw={{ net.gateway }}{% endif %}",
+            "ipconfig{{ net.id }}":"ip={{ net.ip }}/{{ net.cidr }}{% if net.gateway is defined %},gw={{ net.gateway }}{% endif %}",
           {%- endfor -%}  }
     efidisk0:
       storage: "{{ vm_efi_storage | default('local-zfs') }}"
