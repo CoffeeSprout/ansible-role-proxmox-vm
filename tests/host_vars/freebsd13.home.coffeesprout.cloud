@@ -4,6 +4,7 @@ vtnets:
 - name: vtnet0
   ip: 172.16.0.231
   netmask: 255.255.255.0
+  cidr: "24"
   group: uplink
 
 vm_name: "{{ hostname }}"

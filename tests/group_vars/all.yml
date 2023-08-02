@@ -6,6 +6,8 @@ users:
   sudo: True
   ssh: True
 rootpw: "notverysecure"
+vm_ciuser: "coffeesprout"
+vm_cipassword: "{{ rootpw }}"
 
 iso_workdir: "/var/lib/vz/template/iso/"
 default_gateway: 172.16.0.1
@@ -15,3 +17,4 @@ proxmox_node: neptune
 
 #I run mostly E5 26** v3+; Also required because the default kvm64 doesn't work well on Alma9
 vm_cpu: Haswell-noTSX
+vm_storage: local-zfs

@@ -4,6 +4,7 @@ vtnets:
 - name: eth0
   ip: "{{ ip_address }}"
   netmask: 255.255.255.0
+  cidr: "24"
   gateway: "{{ default_gateway }}"
 
 ks_repo_url: "http://mirror.mijn.host/almalinux/"

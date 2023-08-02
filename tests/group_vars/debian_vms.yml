@@ -1,0 +1,14 @@
+vm_net_interfaces:
+- id: net0
+  model: virtio
+  bridge: vmbr0
+
+vm_scsi_disks:
+- bus: scsi
+  id: 2
+  storage: "local-zfs"
+  size: "cloudinit"
+  media: cdrom
+
+vm_cloudimage_url: "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
+vm_cloudimage_path: "/tmp/"

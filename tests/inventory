@@ -9,3 +9,6 @@ freebsd12.home.coffeesprout.cloud
 [alma_vms]
 alma8.home.coffeesprout.cloud
 alma9.home.coffeesprout.cloud
+
+[debian_vms]
+debian12.home.coffeesprout.cloud

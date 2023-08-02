@@ -1,7 +1,13 @@
 ---
 # tasks file for coffeesprout.proxmox-vm
 
-
+- name: prepare list of ide devices
+  set_fact:
+    vm_ide_devices: >-
+      {   {%- for item in vm_isos | default([]) -%}
+            "ide{{item.id}}":"{{ item.storage }}:iso/{{ item.filename }},media=cdrom"{% if not loop.last or vm_cloudimage_url is defined %},{% endif %}
+          {%- endfor -%}
+      }
 
 - name: create new VM with UEFI
   community.general.proxmox_kvm:
@@ -19,24 +25,63 @@
     machine: "{{ vm_machine | default('q35') }}"
     bios: "{{ vm_bios | default('ovmf') }}"
     cpu: "{{ vm_cpu | default(omit) }}"
+    ciuser: "{{ vm_ciuser | default(omit) }}"
+    cipassword: "{{ vm_cipassword | default(omit) }}"
+    nameserver: "{{ vm_nameserver | default(omit) }}"
+    searchdomain: "{{ vm_searchdomain | default(omit) }}"
+    sshkeys: "{{ vm_sshkeys | default(omit) }}"
     agent: "{{ vm_agent | default(True) }}"
+    boot: "c"
+    ipconfig: >-
+      {   {%- for net in vtnets | default([]) -%}
+            "{{ 'ipconfig' + loop.index|string }}":"ip={{ net.ip }}/{{ net.cidr }}{% if net.gateway is defined %},gw={{ net.gateway }}{% endif %}",
+          {%- endfor -%}  }
     efidisk0:
       storage: "{{ vm_efi_storage | default('local-zfs') }}"
       format: raw
       efitype: 4m
       pre_enrolled_keys: "{{ vm_pre_enrolled_keys | default('false') }}"
     virtio: >-
-      {   {%- for item in vm_hard_disks -%}
+      {   {%- for item in vm_hard_disks | default([])  -%}
             "{{ item.bus }}{{ item.id }}":"{{ item.storage }}:{{ item.size }},{% if item.format is defined %}format={{ item.format }},{% endif %}{% if item.media is defined %}media={{ item.media }},{% endif %}{% if (item.backup is defined and not item.backup) %}backup=0,{% endif %}{% if (item.skip_replication is defined and item.skip_replication) %}replicate=0,{% endif %}{% if item.cache is defined %}cache={{ item.cache }},{% endif %}{% if (item.io_thread is defined and item.io_thread) %}iothread=1,{% endif %}{% if (item.ssd_emulation is defined and item.ssd_emulation) %}ssd=1{% endif %}",
           {%- endfor -%}  }
     net: >-
       {   {%- for item in vm_net_interfaces -%}
             "{{ item.id }}":"{% if item.model is defined %}{{ item.model }}{% else %}virtio{% endif %}{% if item.hwaddr is defined %}={{ item.hwaddr }}{% endif %},bridge={{ item.bridge }},{% if (item.firewall is defined and item.firewall) %}firewall=1,{% endif %}{% if (item.disconnect is defined and item.disconnect) %}link_down=1,{% endif %}{% if item.multiqueue is defined %}queues={{ item.multiqueue }},{% endif %}{% if item.rate_limit is defined %}rate={{ item.rate_limit }},{% endif %}{% if item.vlan_tag is defined %}tag={{ item.vlan_tag }}{% endif %}",
           {%- endfor -%}  }
-    ide: >-
-      {   {%- for item in vm_isos -%}
-            "ide{{item.id}}":"{{ item.storage }}:iso/{{ item.filename }},media=cdrom",
-          {%- endfor -%}  }
+    ide: "{{ vm_ide_devices | default(omit) }}"
     scsihw: "{{ vm_scsihw | default('virtio-scsi-pci') }}"
+    scsi: >-
+      {   {%- for item in vm_scsi_disks | default([]) -%}
+            "{{ item.bus }}{{ item.id }}":"{{ item.storage }}:{{ item.size }},{% if item.format is defined %}format={{ item.format }},{% endif %}{% if item.media is defined %}media={{ item.media }},{% endif %}{% if (item.backup is defined and not item.backup) %}backup=0,{% endif %}{% if (item.skip_replication is defined and item.skip_replication) %}replicate=0,{% endif %}{% if item.cache is defined %}cache={{ item.cache }},{% endif %}{% if (item.io_thread is defined and item.io_thread) %}iothread=1,{% endif %}{% if (item.ssd_emulation is defined and item.ssd_emulation) %}ssd=1{% endif %}",
+          {%- endfor -%}  }
   delegate_to: "{{ proxmox_node }}"
   register: proxmox_vm_created
+
+- name: Extract filename from URL if not defined
+  set_fact:
+    vm_cloudimage_filename: "{{ vm_cloudimage_url | urlsplit('path') | basename }}"
+  when: vm_cloudimage_url is defined and vm_cloudimage_filename is not defined
+
+
+- name: Download cloud image
+  get_url:
+    url: "{{ vm_cloudimage_url }}"
+    dest: "{{ vm_cloudimage_path }}/{{ vm_cloudimage_filename }}"
+  register: cloudimage_download
+  delegate_to: "{{ proxmox_node }}"
+  when: vm_cloudimage_url is defined
+
+- name: Import cloud image to Proxmox
+  community.general.proxmox_disk:
+    api_user: "{{ proxmox_api_user | default('root@pam') }}"
+    api_password: "{{ proxmox_api_password | default(lookup('env', 'PROXMOX_PASSWORD')) }}"
+    api_host: "{{ proxmox_api_host }}"
+    storage: "{{ vm_storage }}"
+    vmid: "{{ proxmox_vm_created.vmid }}"
+    disk: "{{ vm_cloudimage_target_disk | default('scsi0') }}"
+    format: "{{ vm_cloudimage_format | default('qcow2') }}"
+    import_from: "{{ vm_cloudimage_path }}/{{ vm_cloudimage_filename }}"
+    state: present
+  when: vm_cloudimage_url is defined
+  delegate_to: "{{ proxmox_node }}"

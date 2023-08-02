@@ -4,6 +4,7 @@ vtnets:
 - name: vtnet0
   ip: 172.16.0.230
   netmask: 255.255.255.0
+  cidr: "24"
 
 vm_name: "{{ hostname }}"
-freebsd_iso_version: 12.3
+freebsd_iso_version: 12.4
