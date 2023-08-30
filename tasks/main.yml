@@ -15,7 +15,7 @@
     api_password: "{{ proxmox_api_password | default(lookup('env', 'PROXMOX_PASSWORD')) }}"
     api_host: "{{ proxmox_api_host }}"
     node: "{{ proxmox_node }}"
-    state: present
+    state: "{{ vm_state | default('present') }}"
     name: "{{ vm_name }}"
     pool: "{{ vm_pool | default(omit) }}"
     ostype: "{{ vm_ostype | default('l26') }}"
@@ -84,4 +84,16 @@
     import_from: "{{ vm_cloudimage_path }}/{{ vm_cloudimage_filename }}"
     state: present
   when: vm_cloudimage_url is defined
+  delegate_to: "{{ proxmox_node }}"
+
+- name: Resize cloud disk
+  community.general.proxmox_disk:
+    api_user: "{{ proxmox_api_user | default('root@pam') }}"
+    api_password: "{{ proxmox_api_password | default(lookup('env', 'PROXMOX_PASSWORD')) }}"
+    api_host: "{{ proxmox_api_host }}"
+    vmid: "{{ proxmox_vm_created.vmid }}"
+    disk: "{{ vm_cloudimage_target_disk | default('scsi0') }}"
+    size: "{{ vm_cloudimage_size }}"
+    state: resized
+  when: vm_cloudimage_size is defined
   delegate_to: "{{ proxmox_node }}"
